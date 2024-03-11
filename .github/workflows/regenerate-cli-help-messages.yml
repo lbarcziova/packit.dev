@@ -1,13 +1,13 @@
 name: Regenerate help messages of CLI commands
 
 on:
+  pull_request:
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * 2"
 
 jobs:
   update-help-messages:
-    if: github.repository_owner == 'packit'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install missing distro dependencies
-        run: sudo apt update && sudo apt-get install libkrb5-dev
+        run: sudo apt update && sudo apt-get install libkrb5-dev python3-rpm
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -28,6 +28,12 @@ jobs:
 
       - name: Regenerate help messages
         run: python3 files/generate_cli_help_messages.py
+
+      - name: Add newline to my-file
+        run: echo "\n" >> files/generate_cli_help_messages.py
+
+      - name: Show diff
+        run: git diff
 
       - name: Create pull request if there are changes
         uses: peter-evans/create-pull-request@v4
